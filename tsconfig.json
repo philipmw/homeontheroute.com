@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "module": "system",
+        "outDir": "./built",
+        "allowJs": true,
+//        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "jsx": "react"
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx"
+    ],
+    "files": [
+        "typings/index.d.ts"
+    ]
+}
