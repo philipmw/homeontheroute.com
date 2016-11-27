@@ -7,6 +7,7 @@ interface Props {
     pin?: Pin,
     onUpdatedPin: (id: number, pin: Pin) => any,
     onNewPin: (pin: Pin) => any,
+    onDeleteAddressInput: (id: number) => any,
 }
 
 export class AddressInput extends React.Component<Props, {}>{
@@ -18,6 +19,7 @@ export class AddressInput extends React.Component<Props, {}>{
         this.userAcceptedAutosuggest = this.userAcceptedAutosuggest.bind(this);
         this.handleFocus = this.handleFocus.bind(this);
         this.handleBlur = this.handleBlur.bind(this);
+        this.handleDeleteButtonClicked = this.handleDeleteButtonClicked.bind(this);
     }
 
     handleChange() {
@@ -67,25 +69,31 @@ export class AddressInput extends React.Component<Props, {}>{
             this.props.onNewPin(newPin);
         }
     }
-    //
-    // onChange(event) {
-    //     this.setState({value: event.target.value});
-    // }
+
+    handleDeleteButtonClicked() {
+        this.props.onDeleteAddressInput(this.props.id);
+    }
 
     render() {
         console.log("rendering AddressInput");
         return <tr>
-        <td>I work here:</td>
         <td>
         <div id={`addressinput-${this.props.id}-container`}>
             <input id={this.inputElementId()}
+                   className={this.props.pin ? '' : 'no-data'}
                    type="search"
-                   width="50"
+                   width="70"
                    onFocus={this.handleFocus}
                    onBlur={this.handleBlur}
                    ref={(text) => this.textInput = text}
                    />
         </div>
+        </td>
+        <td>
+            <input type="button"
+                   value="␡"
+                   onClick={this.handleDeleteButtonClicked}
+            />
         </td>
         </tr>;
     }

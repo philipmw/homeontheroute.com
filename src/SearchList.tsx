@@ -16,7 +16,9 @@ export class SearchList extends React.Component<Props, State> {
         super(props);
         this.handlePinUpdate = this.handlePinUpdate.bind(this);
         this.handlePinAdd = this.handlePinAdd.bind(this);
-        this.handleClick = this.handleClick.bind(this);
+        this.handleAddInput = this.handleAddInput.bind(this);
+        this.handleDeleteInput = this.handleDeleteInput.bind(this);
+        this.addressInput = this.addressInput.bind(this);
     }
 
     componentWillMount() {
@@ -24,24 +26,28 @@ export class SearchList extends React.Component<Props, State> {
             inputsQty: 1,
             pins: [],
         });
+        console.log(`Initialized state to inputsQty=1`);
     }
 
-    handleClick() {
-        console.log("+ was clicked");
-        this.setState((prevState : State, props : Props) => ({
-            inputsQty: prevState.inputsQty + 1,
-            pins: prevState.pins,
-        }));
+    handleAddInput() {
+        this.setState((prevState : State, props : Props) => {
+            console.log(`Ok, now there are ${prevState.inputsQty+1} inputs`);
+            return {
+                inputsQty: prevState.inputsQty + 1,
+                pins: prevState.pins,
+            }
+        });
     }
 
     handlePinAdd(pin: Pin) {
         console.log("SearchList.handlePinAdd");
         this.setState((prevState: State, props: Props) => {
+            console.log(`Ok, now there are ${prevState.inputsQty} inputs`);
             return {
                 pins: [...prevState.pins, pin],
                 inputsQty: prevState.inputsQty,
             };
-        })
+        });
     }
 
     handlePinUpdate(addressInputId: number, pin: Pin) {
@@ -56,42 +62,55 @@ export class SearchList extends React.Component<Props, State> {
         });
     }
 
-    addressInputs() {
-        var list = [];
-        for (let i=0; i < this.state.pins.length; i++) {
-            const pin = this.state.pins[i];
-            list.push(
-                <AddressInput id={i}
-                              onUpdatedPin={this.handlePinUpdate}
-                              pin={pin}
-                              autosuggestMgr={this.props.autosuggestMgr}
-                              key={pin.text}/>
-            );
-        }
-        for (let i=0; i < (this.state.inputsQty - this.state.pins.length); i++) {
-            const id = 999 + i;
-            list.push(
-                <AddressInput id={id}
-                              onNewPin={this.handlePinAdd}
-                              autosuggestMgr={this.props.autosuggestMgr}
-                              key={id}/>
+    handleDeleteInput(addressInputId: number) {
+        this.setState((prevState: State, props: Props) => {
+            return {
+                pins: prevState.pins.splice(addressInputId, 1),
+                inputsQty: prevState.inputsQty - 1,
+            };
+        })
+    }
 
-            );
+    addressInput(i: number) {
+        console.log("Rendering addressInput...");
+        if (i < this.state.pins.length) {
+            return <AddressInput id={i}
+                                 onUpdatedPin={this.handlePinUpdate}
+                                 onDeleteAddressInput={this.handleDeleteInput}
+                                 pin={this.state.pins[i]}
+                                 autosuggestMgr={this.props.autosuggestMgr}
+                                 key={i}/>
         }
-
-        return list;
+        else {
+            return <AddressInput id={i}
+                                 onNewPin={this.handlePinAdd}
+                                 onDeleteAddressInput={this.handleDeleteInput}
+                                 autosuggestMgr={this.props.autosuggestMgr}
+                                 key={i}/>
+        }
     }
 
     render() {
         console.log("rendering SearchList");
-        return <div>
+        const rangeArray = Array(this.state.inputsQty, 0);
+        console.log(`RangeArray: ${JSON.stringify(rangeArray)}`)
+        const inputsList = rangeArray.map((i) => {
+            console.log(i);
+                        return <tr>
+                            <td>{this.addressInput(i)}</td>
+                        </tr>;
+                    });
+        console.log("created inputsList");
+        const v = <div>
             <h2>What are your favorite places?</h2>
             <table>
                 <tbody>
-                {this.addressInputs()}
+                    {inputsList}
                 </tbody>
             </table>
-            <input type="button" value="+" onClick={this.handleClick}/>
+            <input type="button" value="+" onClick={this.handleAddInput}/>
         </div>;
+        console.log("rendered SearchList");
+        return v;
     }
 }
