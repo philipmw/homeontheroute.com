@@ -15,19 +15,13 @@ export class AddressInput extends React.Component<Props, {}>{
 
     constructor(props) {
         super(props);
-        this.handleChange = this.handleChange.bind(this);
         this.userAcceptedAutosuggest = this.userAcceptedAutosuggest.bind(this);
         this.handleFocus = this.handleFocus.bind(this);
         this.handleBlur = this.handleBlur.bind(this);
         this.handleDeleteButtonClicked = this.handleDeleteButtonClicked.bind(this);
     }
 
-    handleChange() {
-        console.log("handleChange()");
-    }
-
     handleFocus(event) {
-        console.log(`handleFocus; autosuggestMgr=${this.props.autosuggestMgr}`);
         const attachTo = `#addressinput-${this.props.id}-text`;
         this.props.autosuggestMgr.attachAutosuggest(
             attachTo,
@@ -39,6 +33,11 @@ export class AddressInput extends React.Component<Props, {}>{
 
     handleBlur(event) {
         this.props.autosuggestMgr.detachAutosuggest();
+        if (this.props.pin) {
+            // If the user modified the text manually but did not accept
+            // an autosuggest, clear away that pollution.
+            this.textInput.value = this.props.pin.text;
+        }
         console.log("autosuggest is detached");
     }
 
@@ -49,6 +48,12 @@ export class AddressInput extends React.Component<Props, {}>{
     componentDidMount() {
         if (this.props.pin) {
             this.textInput.value = this.props.pin.text;
+        }
+        else {
+            // The browser will cache the input text for a given field ID
+            // even if we renumber our addresses.  So this might be no longer
+            // a pin, but it'll keep its stale text string.
+            this.textInput.value = '';
         }
     }
 
@@ -74,28 +79,28 @@ export class AddressInput extends React.Component<Props, {}>{
         this.props.onDeleteAddressInput(this.props.id);
     }
 
-    render() {
-        console.log("rendering AddressInput");
-        return <tr>
-        <td>
-        <div id={`addressinput-${this.props.id}-container`}>
-            <input id={this.inputElementId()}
-                   className={this.props.pin ? '' : 'no-data'}
-                   type="search"
-                   width="70"
-                   onFocus={this.handleFocus}
-                   onBlur={this.handleBlur}
-                   ref={(text) => this.textInput = text}
-                   />
-        </div>
-        </td>
-        <td>
+    deleteButtonElement() {
+        return <div className="delete-button">
             <input type="button"
-                   value="␡"
+                   value="-"
                    onClick={this.handleDeleteButtonClicked}
             />
-        </td>
-        </tr>;
+        </div>;
+    }
+    render() {
+        return <div id={`addressinput-${this.props.id}-container`}>
+            <div className="addressinput">
+                <input id={this.inputElementId()}
+                       className={this.props.pin ? 'with-data' : 'no-data'}
+                       type="search"
+                       width="70"
+                       onFocus={this.handleFocus}
+                       onBlur={this.handleBlur}
+                       ref={(text) => this.textInput = text}
+                       />
+            </div>
+            {this.props.id > 0 ? this.deleteButtonElement() : ''}
+        </div>;
     }
 }
 

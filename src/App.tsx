@@ -22,7 +22,6 @@ class App extends React.Component<Props, State> {
     }
 
     render() {
-        console.log("rendering App");
         return <div>
             <div id="data-collection">
                 <h1>Home On The Route</h1>
@@ -35,11 +34,9 @@ class App extends React.Component<Props, State> {
     }
 
     setAutosuggestMgr(autosuggestMgr : Microsoft.Maps.AutosuggestManager) {
-        console.log("Autosuggest propagated to App!");
         this.setState({
             autosuggestMgr
         });
-        console.log("Autosuggest saved to app state.");
     }
 }
 //
