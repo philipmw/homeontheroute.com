@@ -1,94 +1,33 @@
 import React from 'react';
-import { Pin } from "Pin";
+import { connect } from 'react-redux';
+import { AppState } from 'App';
+import Pin from 'Pin';
 import { AddressInput } from "AddressInput";
 
 interface Props {
-    autosuggestMgr : Microsoft.Maps.AutosuggestManager
-}
-
-interface State {
+    autosuggestMgr : Microsoft.Maps.AutosuggestManager,
     inputsQty : number,
-    pins : Pin[]
+    pins : Pin[],
+    onAddInput : () => any,
+    onAddPin : (pin : Pin) => any,
+    onUpdatePin : (id : number, pin : Pin) => any,
+    onDeleteInput : (id : number) => any,
 }
 
-export class SearchList extends React.Component<Props, State> {
-    constructor(props) {
-        super(props);
-        this.handlePinUpdate = this.handlePinUpdate.bind(this);
-        this.handlePinAdd = this.handlePinAdd.bind(this);
-        this.handleAddInput = this.handleAddInput.bind(this);
-        this.handleDeleteInput = this.handleDeleteInput.bind(this);
-        this.addressInput = this.addressInput.bind(this);
-    }
-
-    componentWillMount() {
-        this.setState({
-            inputsQty: 1,
-            pins: [],
-        });
-    }
-
-    handleAddInput() {
-        this.setState((prevState : State, props : Props) => {
-            return {
-                inputsQty: prevState.inputsQty + 1,
-                pins: prevState.pins,
-            }
-        });
-    }
-
-    handlePinAdd(pin: Pin) {
-        this.setState((prevState: State, props: Props) => {
-            return {
-                pins: [...prevState.pins, pin],
-                inputsQty: prevState.inputsQty,
-            };
-        });
-    }
-
-    handlePinUpdate(addressInputId: number, pin: Pin) {
-        this.setState((prevState: State, props: Props) => {
-            const newPins = prevState.pins.slice();
-            newPins[addressInputId] = pin;
-            return {
-                pins: newPins,
-                inputsQty: prevState.inputsQty,
-            };
-        });
-    }
-
-    handleDeleteInput(addressInputId: number) {
-        this.setState((prevState: State, props: Props) => {
-            if (addressInputId < prevState.pins.length) {
-                // gotta delete a pin
-                return {
-                    pins: prevState.pins.splice(addressInputId, 1),
-                    inputsQty: prevState.inputsQty - 1,
-                };
-            }
-            else {
-                // deleting an empty field
-                return {
-                    pins: prevState.pins,
-                    inputsQty: prevState.inputsQty - 1,
-                };
-            }
-        })
-    }
-
+class SearchListComponent extends React.Component<Props, {}> {
     addressInput(i: number) {
-        if (i < this.state.pins.length) {
+        if (i < this.props.pins.length) {
             return <AddressInput id={i}
-                                 onUpdatedPin={this.handlePinUpdate}
-                                 onDeleteAddressInput={this.handleDeleteInput}
-                                 pin={this.state.pins[i]}
+                                 onUpdatedPin={this.props.onUpdatePin}
+                                 onDeleteAddressInput={this.props.onDeleteInput}
+                                 pin={this.props.pins[i]}
                                  autosuggestMgr={this.props.autosuggestMgr}
                                  key={i}/>
         }
         else {
             return <AddressInput id={i}
-                                 onNewPin={this.handlePinAdd}
-                                 onDeleteAddressInput={this.handleDeleteInput}
+                                 onNewPin={this.props.onAddPin}
+                                 onDeleteAddressInput={this.props.onDeleteInput}
                                  autosuggestMgr={this.props.autosuggestMgr}
                                  key={i}/>
         }
@@ -99,17 +38,103 @@ export class SearchList extends React.Component<Props, State> {
         //  (new Array(inputsQty)).map((i) => ...)
         // but have not been able to make that work in JS.
         let list = [];
-        for (let i=0; i < this.state.inputsQty; i++) {
+        for (let i=0; i < this.props.inputsQty; i++) {
             list.push(this.addressInput(i));
         }
         return list;
     }
 
     render() {
+        const props = this.props;
         return <div>
             <h2>What are your favorite places?</h2>
             {this.addressInputElements()}
-            <input type="button" value="+" onClick={this.handleAddInput}/>
+            <input type="button" value="+" onClick={() => props.onAddInput()}/>
         </div>;
     }
 }
+
+function mapStateToProps(state : AppState, ownProps : Props) {
+    return {
+        autosuggestMgr : state.map.autosuggestMgr,
+        inputsQty : state.searchList.inputsQty,
+        pins : state.searchList.userLocations,
+    }
+}
+
+function mapDispatchToProps(dispatch, ownProps : Props) {
+    return {
+        onAddInput: () => {
+            dispatch({
+                type: 'ADD_INPUT',
+            });
+        },
+        onAddPin: (pin : Pin) => {
+            dispatch({
+                type: 'ADD_PIN',
+                pin,
+            })
+        },
+        onUpdatePin: (id : number, pin : Pin) => {
+            dispatch({
+                type: 'UPDATE_PIN',
+                id,
+                pin,
+            })
+        },
+        onDeleteInput: (id : number) => {
+            dispatch({
+                type: 'DELETE_INPUT',
+                id,
+            });
+        }
+    }
+}
+
+export function reducer(state = INITIAL_STATE, action) {
+    console.log(`SearchList reducer receives ${action.type}`);
+    switch (action.type) {
+        case 'ADD_INPUT':
+            return Object.assign({}, state, {
+                inputsQty: state.inputsQty+1
+            });
+        case 'ADD_PIN':
+            return Object.assign({}, state, {
+                userLocations: [...state.userLocations, action.pin]
+            });
+        case 'UPDATE_PIN':
+            const newPins = state.userLocations.slice();
+            newPins[action.id] = action.pin;
+            return Object.assign({}, state, {
+                userLocations: [...state.userLocations, action.pin]
+            });
+        case 'DELETE_INPUT':
+            if (action.id < state.userLocations.length) {
+                // gotta delete a pin
+                return Object.assign({}, state, {
+                    userLocations: state.userLocations.splice(action.id, 1),
+                    inputsQty: state.inputsQty - 1,
+                });
+            }
+            else {
+                // deleting an empty field
+                return Object.assign({}, state, {
+                    inputsQty: state.inputsQty - 1,
+                });
+            }
+        default:
+            return state;
+    }
+}
+
+export interface State {
+    inputsQty : number,
+    userLocations : Pin[],
+}
+
+const INITIAL_STATE : State = {
+    inputsQty: 1,
+    userLocations: [],
+};
+
+export const SearchList = connect(mapStateToProps, mapDispatchToProps)(SearchListComponent);

@@ -38,9 +38,10 @@
         SystemJS.config({
             baseURL: '/built',
             map: {
-                redux: "https://unpkg.com/redux@3.6.0/dist/redux.min.js",
+                redux: "https://unpkg.com/redux@3.6.0/dist/redux.js",
                 react: "https://unpkg.com/react@15/dist/react.js",
                 'react-dom': "https://unpkg.com/react-dom@15/dist/react-dom.js",
+                'react-redux': "https://unpkg.com/react-redux@4.4.6/dist/react-redux.js",
                 AddressInput: "AddressInput.js",
                 App: "App.js",
                 Credentials: "Credentials.js",
@@ -50,6 +51,7 @@
         });
         SystemJS.import("App");
     </script>
+    <title>Home On The Route</title>
 </head>
 
 <body>

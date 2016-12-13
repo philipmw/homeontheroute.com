@@ -1,6 +1,6 @@
 # Home On The Route
 
-Home On The Route, a web app helping you find the perfect neighborhood for your car-free lifestyle
+Home On The Route, a web app helping you find the perfect neighborhood for your car-free lifestyle.
 
 ## Development Requirements
 
@@ -31,6 +31,12 @@ Then the typings for the following Javascript libraries:
     ````
     typings install react --save
     typings install react-dom --save
+    ````
+
+* [React-Redux](https://github.com/reactjs/react-redux)
+
+    ````
+    typings install react-redux --save
     ````
 
 ## Build
