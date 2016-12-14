@@ -10,7 +10,7 @@ export interface State {
     map : Microsoft.Maps.Map,
     autosuggestMgr : Microsoft.Maps.AutosuggestManager,
     userLocLayer : Microsoft.Maps.Layer,
-    busStopsLayer : Microsoft.Maps.Layer,
+    busStopsLayer : Microsoft.Maps.ClusterLayer,
 }
 
 const INITIAL_STATE : State = {
@@ -27,20 +27,36 @@ interface Props {
     onMapInit : ((map : Microsoft.Maps.Map,
                   autosuggestMgr : Microsoft.Maps.AutosuggestManager,
                   userLocLayer : Microsoft.Maps.Layer,
-                  busStopsLayer : Microsoft.Maps.Layer) => any),
+                  busStopsLayer : Microsoft.Maps.ClusterLayer) => any),
 }
 
-function busStopsListener() {
-    const stops = this.responseText;
-    console.log(`Stops received: ${stops}`);
+function receivedBusStopsFor(layer : Microsoft.Maps.ClusterLayer) {
+    return function() {
+        const stops = JSON.parse(this.responseText);
+        console.log(`Received ${stops.length} stops.`);
+        layer.clear();
+        layer.setPushpins(stops.map((stop) => {
+            const loc = new Microsoft.Maps.Location(stop.lat, stop.lon);
+            return new Microsoft.Maps.Pushpin(loc, {title: stop.name});
+        }));
+    }
 }
-
-function loadBusStopsIntoLayer(layer : Microsoft.Maps.Layer) {
+function loadBusStopsIntoLayer(layer : Microsoft.Maps.ClusterLayer) {
     console.log("Loading stops...");
     const req = new XMLHttpRequest();
-    req.addEventListener('load', busStopsListener);
+    req.addEventListener('load', receivedBusStopsFor(layer));
     req.open('GET', 'http://api.homeontheroute.com/stops');
     req.send();
+}
+
+class MapLazyAttrs {
+    autosuggestMgr : Microsoft.Maps.AutosuggestManager;
+    busStopsLayer : Microsoft.Maps.ClusterLayer;
+
+    constructor(autosuggestMgr, busStopsLayer) {
+        this.autosuggestMgr = autosuggestMgr;
+        this.busStopsLayer = busStopsLayer;
+    }
 }
 
 class MapComponent extends React.Component<Props, {}> {
@@ -58,32 +74,31 @@ class MapComponent extends React.Component<Props, {}> {
 
         const userLocLayer = new Microsoft.Maps.Layer('user-locations');
         map.layers.insert(userLocLayer);
-        const busStopsLayer = new Microsoft.Maps.Layer('bus-stops');
-        map.layers.insert(busStopsLayer);
 
         Promise.all([
             new Promise((res) => {
                 Microsoft.Maps.loadModule('Microsoft.Maps.AutoSuggest', () => {
                     console.log("Autosuggest loaded");
-                    res();
+                    res(new Microsoft.Maps.AutosuggestManager());
                 });
             }),
             new Promise((res) => {
                 Microsoft.Maps.loadModule("Microsoft.Maps.Clustering", () => {
                     console.log("Clustering loaded");
-                    res();
+                    const busStopsLayer = new Microsoft.Maps.ClusterLayer([]);
+                    map.layers.insert(busStopsLayer);
+                    res(busStopsLayer);
                 });
             }),
         ])
-            .then(() => {
-                loadBusStopsIntoLayer(busStopsLayer);
-            })
-            .then(() => {
+            .then((vals) => (new MapLazyAttrs(vals[0], vals[1])))
+            .then((attrs) => {
                 this.props.onMapInit(
                     map,
-                    new Microsoft.Maps.AutosuggestManager(),
+                    attrs.autosuggestMgr,
                     userLocLayer,
-                    busStopsLayer);
+                    attrs.busStopsLayer);
+                loadBusStopsIntoLayer(attrs.busStopsLayer);
             });
     }
 
@@ -113,6 +128,7 @@ export function reducer(state = INITIAL_STATE, action) {
                 map: action.map,
                 autosuggestMgr: action.autosuggestMgr,
                 userLocLayer: action.userLocLayer,
+                busStopsLayer:action.busStopsLayer,
             });
         default:
             return state;
@@ -124,16 +140,18 @@ const mapStateToProps = (state : AppState, ownProps : Props) => {
         map: state.map.map,
         userLocLayer: state.map.userLocLayer,
         userLocations: state.searchList.userLocations,
+        busStopsLayer: state.map.busStopsLayer,
     }
 };
 
 const mapDispatchToProps = (dispatch) => (
     {
-        onMapInit: (map, autosuggestMgr, userLocLayer) => dispatch({
+        onMapInit: (map, autosuggestMgr, userLocLayer, busStopsLayer) => dispatch({
             type: 'MAP_INITIALIZED',
             map,
             autosuggestMgr,
             userLocLayer,
+            busStopsLayer,
         })
     }
 );
