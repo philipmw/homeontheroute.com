@@ -37,7 +37,7 @@ function receivedBusStopsFor(layer : Microsoft.Maps.ClusterLayer) {
         layer.clear();
         layer.setPushpins(stops.map((stop) => {
             const loc = new Microsoft.Maps.Location(stop.lat, stop.lon);
-            return new Microsoft.Maps.Pushpin(loc, {title: stop.name});
+            return new Microsoft.Maps.Pushpin(loc);
         }));
     }
 }
