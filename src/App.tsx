@@ -1,18 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import * as Redux from 'redux';
 import { connect, Provider } from 'react-redux';
 
-import * as SearchList from 'SearchList';
-import * as Map from 'Map';
+import * as SearchList from './SearchList';
+import * as Map from './Map';
 
 export interface AppState {
     map: Map.State,
     searchList: SearchList.State,
 }
 
+interface Window {
+    hotrReduxStore: Redux.Store<AppState>
+}
+declare var window: Window;
+
 class AppComponent extends React.Component<AppState, {}> {
     render() {
+        console.log("Rendering AppComponent");
         return <div>
             <div id="data-collection">
                 <h1>Home On The Route</h1>
@@ -39,6 +45,8 @@ let store = Redux.createStore<AppState>(
         searchList: SearchList.reducer,
     })
 );
+
+window.hotrReduxStore = store;
 
 ReactDOM.render(
     <Provider store={store}>

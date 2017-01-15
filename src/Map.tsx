@@ -1,12 +1,11 @@
-import React from 'react';
+import * as React from 'react';
 import { connect } from 'react-redux';
 import { AppState } from 'App';
 import Pin from 'Pin';
-import { BING_MAPS_KEY } from 'Credentials';
-
-const MAP_CENTER = new Microsoft.Maps.Location(47.611427, -122.337454);
+import { BING_MAPS_KEY } from './Credentials';
 
 export interface State {
+    bingmapsLoaded : boolean,
     map : Microsoft.Maps.Map,
     autosuggestMgr : Microsoft.Maps.AutosuggestManager,
     userLocLayer : Microsoft.Maps.Layer,
@@ -14,6 +13,7 @@ export interface State {
 }
 
 const INITIAL_STATE : State = {
+    bingmapsLoaded: false,
     map: null,
     autosuggestMgr: null,
     userLocLayer: null,
@@ -21,6 +21,7 @@ const INITIAL_STATE : State = {
 };
 
 interface Props {
+    bingmapsLoaded : boolean,
     map : Microsoft.Maps.Map,
     userLocLayer : Microsoft.Maps.Layer,
     userLocations : Pin[],
@@ -60,48 +61,6 @@ class MapLazyAttrs {
 }
 
 class MapComponent extends React.Component<Props, {}> {
-    componentDidMount() {
-        console.log("creating Map...");
-        const map = new Microsoft.Maps.Map("#main-map", {
-            credentials: BING_MAPS_KEY,
-            center: MAP_CENTER,
-            maxBounds: new Microsoft.Maps.LocationRect(
-                MAP_CENTER,
-                0.5, //width
-                0.5 // height
-            )
-        });
-
-        const userLocLayer = new Microsoft.Maps.Layer('user-locations');
-        map.layers.insert(userLocLayer);
-
-        Promise.all([
-            new Promise((res) => {
-                Microsoft.Maps.loadModule('Microsoft.Maps.AutoSuggest', () => {
-                    console.log("Autosuggest loaded");
-                    res(new Microsoft.Maps.AutosuggestManager());
-                });
-            }),
-            new Promise((res) => {
-                Microsoft.Maps.loadModule("Microsoft.Maps.Clustering", () => {
-                    console.log("Clustering loaded");
-                    const busStopsLayer = new Microsoft.Maps.ClusterLayer([]);
-                    map.layers.insert(busStopsLayer);
-                    res(busStopsLayer);
-                });
-            }),
-        ])
-            .then((vals) => (new MapLazyAttrs(vals[0], vals[1])))
-            .then((attrs) => {
-                this.props.onMapInit(
-                    map,
-                    attrs.autosuggestMgr,
-                    userLocLayer,
-                    attrs.busStopsLayer);
-                loadBusStopsIntoLayer(attrs.busStopsLayer);
-            });
-    }
-
     render() {
         console.log(`Map sees ${this.props.userLocations.length} user locations`);
         // Sync pins on the map with user locations.
@@ -121,8 +80,59 @@ class MapComponent extends React.Component<Props, {}> {
     }
 }
 
+function initializeMap() {
+    const MAP_CENTER = new Microsoft.Maps.Location(47.611427, -122.337454);
+
+    console.log("creating Map...");
+    const map = new Microsoft.Maps.Map("#main-map", {
+        credentials: BING_MAPS_KEY,
+        center: MAP_CENTER,
+        maxBounds: new Microsoft.Maps.LocationRect(
+            MAP_CENTER,
+            0.5, //width
+            0.5 // height
+        )
+    });
+
+    const userLocLayer = new Microsoft.Maps.Layer('user-locations');
+    map.layers.insert(userLocLayer);
+
+    Promise.all([
+        new Promise((res) => {
+            Microsoft.Maps.loadModule('Microsoft.Maps.AutoSuggest', () => {
+                console.log("Autosuggest loaded");
+                res(new Microsoft.Maps.AutosuggestManager());
+            });
+        }),
+        new Promise((res) => {
+            Microsoft.Maps.loadModule("Microsoft.Maps.Clustering", () => {
+                console.log("Clustering loaded");
+                const busStopsLayer = new Microsoft.Maps.ClusterLayer([]);
+                map.layers.insert(busStopsLayer);
+                res(busStopsLayer);
+            });
+        }),
+    ])
+        .then((vals) => (new MapLazyAttrs(vals[0], vals[1])))
+        .then((attrs) => {
+            this.props.onMapInit(
+                map,
+                attrs.autosuggestMgr,
+                userLocLayer,
+                attrs.busStopsLayer);
+            loadBusStopsIntoLayer(attrs.busStopsLayer);
+        });
+
+}
+
 export function reducer(state = INITIAL_STATE, action) {
+    console.log(`Map reducer receives ${action.type}`);
     switch (action.type) {
+        case 'BINGMAPS_JS_LOADED':
+            initializeMap();
+            return Object.assign({}, state, {
+                bingmapsLoaded: true,
+            });
         case 'MAP_INITIALIZED':
             return Object.assign({}, state, {
                 map: action.map,

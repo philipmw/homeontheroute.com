@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import Pin from "Pin";
 
 interface Props {
@@ -88,6 +88,7 @@ export class AddressInput extends React.Component<Props, {}>{
         </div>;
     }
     render() {
+        console.log("Rendering AddressInput");
         return <div id={`addressinput-${this.props.id}-container`}>
             <div className="addressinput">
                 <input id={this.inputElementId()}

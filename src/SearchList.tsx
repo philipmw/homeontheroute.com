@@ -1,8 +1,8 @@
-import React from 'react';
+import * as React from 'react';
 import { connect } from 'react-redux';
-import { AppState } from 'App';
-import Pin from 'Pin';
-import { AddressInput } from "AddressInput";
+import { AppState } from './App';
+import Pin from './Pin';
+import { AddressInput } from './AddressInput';
 
 interface Props {
     autosuggestMgr : Microsoft.Maps.AutosuggestManager,
@@ -45,6 +45,7 @@ class SearchListComponent extends React.Component<Props, {}> {
     }
 
     render() {
+        console.log("Rendering SearchList");
         const props = this.props;
         return <div>
             <h2>What are your favorite places?</h2>
@@ -59,7 +60,7 @@ function mapStateToProps(state : AppState, ownProps : Props) {
         autosuggestMgr : state.map.autosuggestMgr,
         inputsQty : state.searchList.inputsQty,
         pins : state.searchList.userLocations,
-    }
+    };
 }
 
 function mapDispatchToProps(dispatch, ownProps : Props) {
