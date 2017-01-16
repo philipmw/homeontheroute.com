@@ -13,6 +13,6 @@
     "typescript": "latest",
     "ts-loader": "latest",
     "typings": "latest",
-    "webpack@beta": "latest"
+    "webpack": "beta"
   }
 }
