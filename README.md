@@ -2,54 +2,17 @@
 
 Home On The Route, a web app helping you find the perfect neighborhood for your car-free lifestyle.
 
+## Build status
+
+* prod: [![CircleCI](https://circleci.com/gh/philipmw/homeontheroute.com/tree/master.svg?style=svg)](https://circleci.com/gh/philipmw/homeontheroute.com/tree/master)
+* beta: [![CircleCI](https://circleci.com/gh/philipmw/homeontheroute.com/tree/beta.svg?style=svg)](https://circleci.com/gh/philipmw/homeontheroute.com/tree/beta)
+
 ## Development Requirements
 
-First, install with Homebrew:
+For instructions on what it takes to set up Home On The Route on a fresh computer, refer to `circle.yml`.
+This is guaranteed to be accurate, since this project is continuously built from it.
 
-* [Npm](http://www.npmjs.com)
-
-Then, `npm install`.
-
-Lastly, `npm install --save-dev webpack@beta`.
-
-Then the typings for the following Javascript libraries:
-
-* [Bing Maps V8 Web Control](https://msdn.microsoft.com/en-us/library/mt712542.aspx)
-
-    ````
-    typings install github:Microsoft/Bing-Maps-V8-TypeScript-Definitions/scripts/MicrosoftMaps/Microsoft.Maps.d.ts --global --save
-    typings install github:Microsoft/Bing-Maps-V8-TypeScript-Definitions/scripts/MicrosoftMaps/Modules/Autosuggest.d.ts --global --save
-    typings install github:Microsoft/Bing-Maps-V8-TypeScript-Definitions/scripts/MicrosoftMaps/Modules/Clustering.d.ts --global --save
-    typings install github:Microsoft/Bing-Maps-V8-TypeScript-Definitions/scripts/MicrosoftMaps/Modules/Search.d.ts --global --save
-    ````
-
-* [Redux](https://github.com/reactjs/redux)
-
-    ````
-    typings install dt~redux
-    ````
-
-
-* [React](https://facebook.github.io/react)
-
-    ````
-    typings install react --save
-    typings install react-dom --save
-    ````
-
-* [React-Redux](https://github.com/reactjs/react-redux)
-
-    ````
-    typings install react-redux --save
-    ````
-
-## Build
-
-````
-$ ./node_modules/.bin/webpack
-````
-
-## Run
+## Run locally
 
 ````
 $ python -m SimpleHTTPServer 8000

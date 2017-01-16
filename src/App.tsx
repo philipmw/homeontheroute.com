@@ -7,8 +7,8 @@ import * as SearchList from './SearchList';
 import * as Map from './Map';
 
 export interface AppState {
-    map: Map.State,
-    searchList: SearchList.State,
+    map?: Map.AppStateSlice,
+    searchList?: SearchList.AppStateSlice,
 }
 
 interface Window {

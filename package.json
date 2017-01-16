@@ -5,14 +5,14 @@
   "license": "GPL-3.0",
   "dependencies": {
     "typescript": "latest",
-    "typings": "latest",
     "ts-loader": "latest"
-  },
-  "devDependencies": {
-    "webpack": "latest"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/philipmw/homeontheroute.com"
+  },
+  "devDependencies": {
+    "typings": "^2.1.0",
+    "webpack": "^2.2.0-rc.5"
   }
 }

@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: homeontheroute.com front-end
+Resources:
+  HotrProdBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      BucketName: homeontheroute.com
+      WebsiteConfiguration:
+        IndexDocument: index.html
+  HotrProdBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: HotrProdBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: s3:GetObject
+            Principal: "*"
+            Resource:
+              - Fn::Sub: "arn:aws:s3:::${HotrProdBucket}/*"
+  WwwHotrProdBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      BucketName: www.homeontheroute.com
+      WebsiteConfiguration:
+        RedirectAllRequestsTo:
+          HostName: homeontheroute.com
+  WwwHotrProdRoute:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+        DNSName: s3-website-us-west-2.amazonaws.com
+        HostedZoneId: Z3BJ6K6RIION7M
+      HostedZoneName: homeontheroute.com.
+      Name: www.homeontheroute.com.
+      Type: A
+  HotrBetaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      BucketName: beta.homeontheroute.com
+      WebsiteConfiguration:
+        IndexDocument: index.html
+  HotrBetaBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: HotrBetaBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: s3:GetObject
+            Principal: "*"
+            Resource:
+              - Fn::Sub: "arn:aws:s3:::${HotrBetaBucket}/*"
+  HotrProdRoute:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+        DNSName: s3-website-us-west-2.amazonaws.com
+        HostedZoneId: Z3BJ6K6RIION7M
+      HostedZoneName: homeontheroute.com.
+      Name: homeontheroute.com.
+      Type: A
+  BetaHotrProdRoute:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        # http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+        DNSName: s3-website-us-west-2.amazonaws.com
+        HostedZoneId: Z3BJ6K6RIION7M
+      HostedZoneName: homeontheroute.com.
+      Name: beta.homeontheroute.com.
+      Type: A
+  DeploymentUser:
+    Type: AWS::IAM::User
+    Properties:
+      Policies:
+        - PolicyName: UpdateWebsiteS3Buckets
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: s3:*
+                Resource:
+                  - Fn::Sub: "arn:aws:s3:::${HotrProdBucket}"
+                  - Fn::Sub: "arn:aws:s3:::${HotrProdBucket}/*"
+                  - Fn::Sub: "arn:aws:s3:::${HotrBetaBucket}"
+                  - Fn::Sub: "arn:aws:s3:::${HotrBetaBucket}/*"
+  DeploymentUserKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName:
+        Ref: DeploymentUser
+Outputs:
+  DeploymentUserAccessId:
+    Value:
+      Ref: DeploymentUserKey
+  DeploymentUserPrivateKey:
+    Value:
+      Fn::GetAtt:
+        - DeploymentUserKey
+        - SecretAccessKey

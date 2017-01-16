@@ -5,19 +5,26 @@ import Pin from './Pin';
 import { AddressInput } from './AddressInput';
 
 interface Props {
-    autosuggestMgr : Microsoft.Maps.AutosuggestManager,
-    inputsQty : number,
-    pins : Pin[],
-    onAddInput : () => any,
-    onAddPin : (pin : Pin) => any,
-    onUpdatePin : (id : number, pin : Pin) => any,
-    onDeleteInput : (id : number) => any,
+    autosuggestMgr? : Microsoft.Maps.AutosuggestManager,
+    inputsQty? : number,
+    pins? : Pin[],
+    onAddInput? : () => any,
+    onAddPin? : (pin : Pin) => any,
+    onUpdatePin? : (id : number, pin : Pin) => any,
+    onDeleteInput? : (id : number) => any,
 }
 
 class SearchListComponent extends React.Component<Props, {}> {
+    public static defaultProps : Props = {
+        autosuggestMgr : null,
+        inputsQty: 0,
+        pins: [],
+    };
+
     addressInput(i: number) {
         if (i < this.props.pins.length) {
             return <AddressInput id={i}
+                                 onNewPin={null}
                                  onUpdatedPin={this.props.onUpdatePin}
                                  onDeleteAddressInput={this.props.onDeleteInput}
                                  pin={this.props.pins[i]}
@@ -27,6 +34,7 @@ class SearchListComponent extends React.Component<Props, {}> {
         else {
             return <AddressInput id={i}
                                  onNewPin={this.props.onAddPin}
+                                 onUpdatedPin={null}
                                  onDeleteAddressInput={this.props.onDeleteInput}
                                  autosuggestMgr={this.props.autosuggestMgr}
                                  key={i}/>
@@ -67,7 +75,7 @@ function mapDispatchToProps(dispatch, ownProps : Props) {
     return {
         onAddInput: () => {
             dispatch({
-                type: 'ADD_INPUT',
+                type: 'ADD_ADDRESS_INPUT',
             });
         },
         onAddPin: (pin : Pin) => {
@@ -95,7 +103,7 @@ function mapDispatchToProps(dispatch, ownProps : Props) {
 export function reducer(state = INITIAL_STATE, action) {
     console.log(`SearchList reducer receives ${action.type}`);
     switch (action.type) {
-        case 'ADD_INPUT':
+        case 'ADD_ADDRESS_INPUT':
             return Object.assign({}, state, {
                 inputsQty: state.inputsQty+1
             });
@@ -128,12 +136,12 @@ export function reducer(state = INITIAL_STATE, action) {
     }
 }
 
-export interface State {
+export interface AppStateSlice {
     inputsQty : number,
     userLocations : Pin[],
 }
 
-const INITIAL_STATE : State = {
+const INITIAL_STATE : AppStateSlice = {
     inputsQty: 1,
     userLocations: [],
 };

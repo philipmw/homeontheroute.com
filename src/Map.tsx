@@ -2,9 +2,8 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { AppState } from 'App';
 import Pin from 'Pin';
-import { BING_MAPS_KEY } from './Credentials';
 
-export interface State {
+export interface AppStateSlice {
     bingmapsLoaded : boolean,
     map : Microsoft.Maps.Map,
     autosuggestMgr : Microsoft.Maps.AutosuggestManager,
@@ -12,7 +11,7 @@ export interface State {
     busStopsLayer : Microsoft.Maps.ClusterLayer,
 }
 
-const INITIAL_STATE : State = {
+const INITIAL_STATE : AppStateSlice = {
     bingmapsLoaded: false,
     map: null,
     autosuggestMgr: null,
@@ -21,11 +20,10 @@ const INITIAL_STATE : State = {
 };
 
 interface Props {
-    bingmapsLoaded : boolean,
-    map : Microsoft.Maps.Map,
-    userLocLayer : Microsoft.Maps.Layer,
-    userLocations : Pin[],
-    onMapInit : ((map : Microsoft.Maps.Map,
+    map? : Microsoft.Maps.Map,
+    userLocLayer? : Microsoft.Maps.Layer,
+    userLocations? : Pin[],
+    onMapInit? : ((map : Microsoft.Maps.Map,
                   autosuggestMgr : Microsoft.Maps.AutosuggestManager,
                   userLocLayer : Microsoft.Maps.Layer,
                   busStopsLayer : Microsoft.Maps.ClusterLayer) => any),
@@ -61,6 +59,13 @@ class MapLazyAttrs {
 }
 
 class MapComponent extends React.Component<Props, {}> {
+    public static defaultProps : Props = {
+        map : null,
+        userLocLayer : null,
+        userLocations : [],
+        onMapInit : null,
+    };
+
     render() {
         console.log(`Map sees ${this.props.userLocations.length} user locations`);
         // Sync pins on the map with user locations.
@@ -85,7 +90,8 @@ function initializeMap() {
 
     console.log("creating Map...");
     const map = new Microsoft.Maps.Map("#main-map", {
-        credentials: BING_MAPS_KEY,
+        // we can't hide this from the browser, so why hide it in source code?
+        credentials: "AmOCaZsYX3MP2cegEIheITvAYe2LF7vXLZKX9dHHMMIv4uH4JH2hWaZ6MEQ5C8k1",
         center: MAP_CENTER,
         maxBounds: new Microsoft.Maps.LocationRect(
             MAP_CENTER,
@@ -130,9 +136,7 @@ export function reducer(state = INITIAL_STATE, action) {
     switch (action.type) {
         case 'BINGMAPS_JS_LOADED':
             initializeMap();
-            return Object.assign({}, state, {
-                bingmapsLoaded: true,
-            });
+            return Object.assign({}, state);
         case 'MAP_INITIALIZED':
             return Object.assign({}, state, {
                 map: action.map,
