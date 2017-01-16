@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0-pre",
+  "description": "web app Home On The Route (homeontheroute.com)",
+  "homepage": "http://homeontheroute.com",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "typescript": "latest",
+    "typings": "latest",
+    "ts-loader": "latest"
+  },
+  "devDependencies": {
+    "webpack": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philipmw/homeontheroute.com"
+  }
+}

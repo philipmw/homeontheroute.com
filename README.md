@@ -8,12 +8,9 @@ First, install with Homebrew:
 
 * [Npm](http://www.npmjs.com)
 
-Then, install with Npm:
+Then, `npm install`.
 
-* [Webpack](http://webpack.github.io): `npm install --save-dev webpack@beta`
-* [TypeScript](https://www.typescriptlang.org/): `npm install typescript`
-* [Typings](https://github.com/typings/typings): `npm install typings`
-* [ts-loader](https://github.com/TypeStrong/ts-loader): `npm install ts-loader`
+Lastly, `npm install --save-dev webpack@beta`.
 
 Then the typings for the following Javascript libraries:
 
