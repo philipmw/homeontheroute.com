@@ -1,173 +1,168 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
-import { AppState } from 'App';
-import Pin from 'Pin';
+import {connect} from 'react-redux';
+import * as Redux from 'redux';
 
-export interface AppStateSlice {
-    bingmapsLoaded : boolean,
-    map : Microsoft.Maps.Map,
-    autosuggestMgr : Microsoft.Maps.AutosuggestManager,
-    userLocLayer : Microsoft.Maps.Layer,
-    busStopsLayer : Microsoft.Maps.ClusterLayer,
+import * as API from './API';
+import {IAppState} from './App';
+import Pin from './Pin';
+
+export interface IAppStateSlice {
+  map: Microsoft.Maps.Map;
+  autosuggestMgr: Microsoft.Maps.AutosuggestManager;
+  userLocLayer: Microsoft.Maps.Layer;
+  busStopsLayer: Microsoft.Maps.ClusterLayer;
 }
 
-const INITIAL_STATE : AppStateSlice = {
-    bingmapsLoaded: false,
-    map: null,
-    autosuggestMgr: null,
-    userLocLayer: null,
-    busStopsLayer: null,
+const INITIAL_STATE: IAppStateSlice = {
+  map: null,
+  autosuggestMgr: null,
+  userLocLayer: null,
+  busStopsLayer: null,
 };
 
-interface Props {
-    map? : Microsoft.Maps.Map,
-    userLocLayer? : Microsoft.Maps.Layer,
-    userLocations? : Pin[],
-    onMapInit? : ((map : Microsoft.Maps.Map,
-                  autosuggestMgr : Microsoft.Maps.AutosuggestManager,
-                  userLocLayer : Microsoft.Maps.Layer,
-                  busStopsLayer : Microsoft.Maps.ClusterLayer) => any),
+interface IProps {
+  map?: Microsoft.Maps.Map;
+  userLocLayer?: Microsoft.Maps.Layer;
+  userLocations?: Pin[];
 }
 
-function receivedBusStopsFor(layer : Microsoft.Maps.ClusterLayer) {
-    return function() {
-        const stops = JSON.parse(this.responseText);
-        console.log(`Received ${stops.length} stops.`);
-        layer.clear();
-        layer.setPushpins(stops.map((stop) => {
-            const loc = new Microsoft.Maps.Location(stop.lat, stop.lon);
-            return new Microsoft.Maps.Pushpin(loc);
-        }));
-    }
-}
-function loadBusStopsIntoLayer(layer : Microsoft.Maps.ClusterLayer) {
-    console.log("Loading stops...");
-    const req = new XMLHttpRequest();
-    req.addEventListener('load', receivedBusStopsFor(layer));
-    req.open('GET', 'http://api.homeontheroute.com/stops');
-    req.send();
-}
+class MapComponent extends React.Component<IProps, {}> {
+  public static defaultProps: IProps = {
+    map: null,
+    userLocLayer: null,
+    userLocations: [],
+  };
 
-class MapLazyAttrs {
-    autosuggestMgr : Microsoft.Maps.AutosuggestManager;
-    busStopsLayer : Microsoft.Maps.ClusterLayer;
-
-    constructor(autosuggestMgr, busStopsLayer) {
-        this.autosuggestMgr = autosuggestMgr;
-        this.busStopsLayer = busStopsLayer;
-    }
-}
-
-class MapComponent extends React.Component<Props, {}> {
-    public static defaultProps : Props = {
-        map : null,
-        userLocLayer : null,
-        userLocations : [],
-        onMapInit : null,
-    };
-
-    render() {
-        console.log(`Map sees ${this.props.userLocations.length} user locations`);
-        // Sync pins on the map with user locations.
-        if (this.props.userLocLayer) {
-            this.props.userLocLayer.clear();
-            for (var pin of this.props.userLocations) {
-                this.props.userLocLayer.add(
-                    new Microsoft.Maps.Pushpin(
-                        pin.location,
-                        {
-                            title: pin.text,
-                        }
-                    ));
+  public render() {
+    console.log(`Map sees ${this.props.userLocations.length} user locations`);
+    // Sync pins on the map with user locations.
+    if (this.props.userLocLayer) {
+      this.props.userLocLayer.clear();
+      for (const pin of this.props.userLocations) {
+        this.props.userLocLayer.add(
+          new Microsoft.Maps.Pushpin(
+            pin.location,
+            {
+              title: pin.text,
             }
-        }
-        return <div id="main-map"></div>;
+          ));
+      }
     }
+    return <div id='main-map'></div>;
+  }
 }
 
-function initializeMap() {
-    const MAP_CENTER = new Microsoft.Maps.Location(47.611427, -122.337454);
+export function initializeAsync(dispatch: Redux.Dispatch<IAppState>) {
+  console.log('Beginning to initialize Map asynchronously from React');
 
-    console.log("creating Map...");
-    const map = new Microsoft.Maps.Map("#main-map", {
+  const MAP_CENTER = new Microsoft.Maps.Location(47.611427, -122.337454);
+
+  let map: Microsoft.Maps.Map;
+  let userLocLayer: Microsoft.Maps.Layer;
+  let autosuggestMgr: Microsoft.Maps.AutosuggestManager;
+  let busStopsLayer: Microsoft.Maps.ClusterLayer;
+
+  Promise.resolve()
+    .then(() => {
+      console.log('Loading Bing Maps JS...');
+      const bingScriptE = document.createElement('script');
+      bingScriptE.setAttribute('src', '//www.bing.com/api/maps/mapcontrol');
+      bingScriptE.setAttribute('type', 'text/javascript');
+      document.body.appendChild(bingScriptE);
+      console.log('Loading Bing Maps element created');
+    })
+    .then(() => {
+      console.log('constructing Map...');
+      map = new Microsoft.Maps.Map('#main-map', {
         // we can't hide this from the browser, so why hide it in source code?
-        credentials: "AmOCaZsYX3MP2cegEIheITvAYe2LF7vXLZKX9dHHMMIv4uH4JH2hWaZ6MEQ5C8k1",
+        credentials: 'AmOCaZsYX3MP2cegEIheITvAYe2LF7vXLZKX9dHHMMIv4uH4JH2hWaZ6MEQ5C8k1',
         center: MAP_CENTER,
         maxBounds: new Microsoft.Maps.LocationRect(
-            MAP_CENTER,
-            0.5, //width
-            0.5 // height
+          MAP_CENTER,
+          0.5, //width
+          0.5 // height
         )
+      });
+      console.log('Map constructed.');
+
+      userLocLayer = new Microsoft.Maps.Layer('user-locations');
+      map.layers.insert(userLocLayer);
+    })
+    .then(() =>
+      Promise.all([
+        new Promise((res) => {
+          console.log('Loading AutoSuggest');
+          Microsoft.Maps.loadModule('Microsoft.Maps.AutoSuggest', () => {
+            console.log('Autosuggest loaded');
+            res(new Microsoft.Maps.AutosuggestManager());
+          });
+        }),
+        new Promise((res) => {
+          console.log('Loading Clustering');
+          Microsoft.Maps.loadModule('Microsoft.Maps.Clustering', () => {
+            console.log('Clustering loaded');
+            busStopsLayer = new Microsoft.Maps.ClusterLayer([]);
+            map.layers.insert(busStopsLayer);
+            res(busStopsLayer);
+          });
+        }),
+      ])
+    )
+    .then((vals) => {
+      console.log('Map and modules are loaded!');
+      autosuggestMgr = vals[0];
+      busStopsLayer = vals[1];
+    })
+    .then(() => {
+      console.log('Requesting bus stops from the API');
+      return API.stops();
+    })
+    .then((stops) => {
+      console.log(`Received ${stops.length} stops.  Loading them into the layer...`);
+      busStopsLayer.clear();
+      busStopsLayer.setPushpins(stops.map((stop) => {
+        const loc = new Microsoft.Maps.Location(stop.lat, stop.lon);
+        return new Microsoft.Maps.Pushpin(loc);
+      }));
+    })
+    .then(() => {
+      dispatch({
+        type: 'MAP_INITIALIZED',
+        map,
+        autosuggestMgr,
+        userLocLayer,
+        busStopsLayer
+      });
     });
-
-    const userLocLayer = new Microsoft.Maps.Layer('user-locations');
-    map.layers.insert(userLocLayer);
-
-    Promise.all([
-        new Promise((res) => {
-            Microsoft.Maps.loadModule('Microsoft.Maps.AutoSuggest', () => {
-                console.log("Autosuggest loaded");
-                res(new Microsoft.Maps.AutosuggestManager());
-            });
-        }),
-        new Promise((res) => {
-            Microsoft.Maps.loadModule("Microsoft.Maps.Clustering", () => {
-                console.log("Clustering loaded");
-                const busStopsLayer = new Microsoft.Maps.ClusterLayer([]);
-                map.layers.insert(busStopsLayer);
-                res(busStopsLayer);
-            });
-        }),
-    ])
-        .then((vals) => (new MapLazyAttrs(vals[0], vals[1])))
-        .then((attrs) => {
-            this.props.onMapInit(
-                map,
-                attrs.autosuggestMgr,
-                userLocLayer,
-                attrs.busStopsLayer);
-            loadBusStopsIntoLayer(attrs.busStopsLayer);
-        });
-
 }
 
-export function reducer(state = INITIAL_STATE, action) {
-    console.log(`Map reducer receives ${action.type}`);
-    switch (action.type) {
-        case 'BINGMAPS_JS_LOADED':
-            initializeMap();
-            return Object.assign({}, state);
-        case 'MAP_INITIALIZED':
-            return Object.assign({}, state, {
-                map: action.map,
-                autosuggestMgr: action.autosuggestMgr,
-                userLocLayer: action.userLocLayer,
-                busStopsLayer:action.busStopsLayer,
-            });
-        default:
-            return state;
-    }
+export function reducer(state: IAppStateSlice = INITIAL_STATE, action: any) {
+  console.log(`Map reducer receives ${action.type}`);
+  switch (action.type) {
+    case 'MAP_INITIALIZED':
+      return Object.assign({}, state, {
+        map: action.map,
+        autosuggestMgr: action.autosuggestMgr,
+        userLocLayer: action.userLocLayer,
+        busStopsLayer: action.busStopsLayer,
+      });
+    default:
+      return state;
+  }
 }
 
-const mapStateToProps = (state : AppState, ownProps : Props) => {
-    return {
-        map: state.map.map,
-        userLocLayer: state.map.userLocLayer,
-        userLocations: state.searchList.userLocations,
-        busStopsLayer: state.map.busStopsLayer,
-    }
-};
+function mapStateToProps(state: IAppState) {
+  return {
+    map: state.map.map,
+    userLocLayer: state.map.userLocLayer,
+    userLocations: state.searchList.userLocations,
+    busStopsLayer: state.map.busStopsLayer,
+  };
+}
 
-const mapDispatchToProps = (dispatch) => (
-    {
-        onMapInit: (map, autosuggestMgr, userLocLayer, busStopsLayer) => dispatch({
-            type: 'MAP_INITIALIZED',
-            map,
-            autosuggestMgr,
-            userLocLayer,
-            busStopsLayer,
-        })
-    }
-);
+function mapDispatchToProps(dispatch: Redux.Dispatch<{}>) {
+  return {};
+}
 
+// tslint:disable-next-line:variable-name
 export const Map = connect(mapStateToProps, mapDispatchToProps)(MapComponent);

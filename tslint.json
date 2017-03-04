@@ -1,0 +1,10 @@
+{
+  "extends": "./node_modules/tslint-microsoft-contrib/tslint.json",
+  "rules": {
+    "missing-jsdoc": false,
+    "no-any": false,
+    "no-console": false,
+    "react-tsx-curly-spacing": false,
+    "trailing-comma": false
+  }
+}

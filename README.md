@@ -14,9 +14,8 @@ This is guaranteed to be accurate, since this project is continuously built from
 
 ## Run locally
 
-````
-$ python -m SimpleHTTPServer 8000
-````
+    $ npm run build   # for some reason `npm build` does nothing...
+    $ npm start
 
 Now go to http://localhost:8000
 
@@ -24,6 +23,12 @@ Now go to http://localhost:8000
 
 This web app uses _React_ for UX and _Redux_ for managing state.
 The two are joined by _react-redux_.
+
+I found these useful throughout development:
+
+* http://redux.js.org/docs/basics/UsageWithReact.html
+* http://redux.js.org/docs/advanced/AsyncActions.html
+* https://github.com/reactjs/react-redux/blob/master/docs/api.md#connectmapstatetoprops-mapdispatchtoprops-mergeprops-options
 
 The loading sequence:
 
@@ -40,9 +45,28 @@ But I consider this rare enough that I don't want to spend time fixing it right 
 
 ## Adding dependencies
 
+### If in NPM
+
+Update `package.json`, then:
+
+    npm install
+
+That'll allow compilation with TypeScript.
+
+Update the HTML file to include the same JS from an external CDN.
+
+### If in Typings
+
 ````
 typings search <dep>
 typings install dt~<dependency> --save
 ````
 
 This will auto-update `typings.json`.
+
+### Then
+
+1. Update `index.html` to include the same JS from an external CDN.
+2. Update `webpack.config.js` to know the new JS is provided externally.
+
+Both of these steps are because I refuse to pay for hosting these dependencies myself; let the public CDN bear the cost.

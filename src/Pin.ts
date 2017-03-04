@@ -1,4 +1,4 @@
 export default class Pin {
-    location : Microsoft.Maps.Location;
-    text : string;
+  location: Microsoft.Maps.Location;
+  text: string;
 }

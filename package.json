@@ -4,15 +4,30 @@
   "homepage": "http://homeontheroute.com",
   "license": "GPL-3.0",
   "dependencies": {
+    "react": "15.4.2",
+    "react-dom": "15.4.2",
+    "react-redux": "5.0.3",
+    "redux": "3.6.0",
+    "redux-thunk": "2.2.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/philipmw/homeontheroute.com"
   },
   "devDependencies": {
+    "@types/react": "~15",
+    "@types/react-dom": "latest",
+    "@types/react-redux": "latest",
     "typescript": "latest",
     "ts-loader": "latest",
-    "typings": "latest",
+    "tslint": "latest",
+    "tslint-microsoft-contrib": "latest",
     "webpack": "beta"
+  },
+  "scripts": {
+    "install-typings": "./bin/install-typings.sh",
+    "lint": "tslint --typecheck -t verbose src/**/*.ts[x]",
+    "build": "webpack --display-error-details && npm run lint",
+    "start": "python -m SimpleHTTPServer 8000"
   }
 }
