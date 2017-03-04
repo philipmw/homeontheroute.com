@@ -7,7 +7,7 @@ dependencies:
     - npm run install-typings
 compile:
   override:
-    - npm build
+    - npm run build
 test:
   override:
     - '[ -f ./built/app.bundle.js ]'
