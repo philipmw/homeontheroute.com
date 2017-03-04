@@ -6,11 +6,16 @@ import * as API from './API';
 import {IAppState} from './App';
 import Pin from './Pin';
 
+type AutosuggestMgr = Microsoft.Maps.AutosuggestManager;
+type Layer = Microsoft.Maps.Layer;
+type ClusterLayer = Microsoft.Maps.ClusterLayer;
+type MsMap = Microsoft.Maps.Map;
+
 export interface IAppStateSlice {
-  map: Microsoft.Maps.Map;
-  autosuggestMgr: Microsoft.Maps.AutosuggestManager;
-  userLocLayer: Microsoft.Maps.Layer;
-  busStopsLayer: Microsoft.Maps.ClusterLayer;
+  map: MsMap;
+  autosuggestMgr: AutosuggestMgr;
+  userLocLayer: Layer;
+  busStopsLayer: ClusterLayer;
 }
 
 const INITIAL_STATE: IAppStateSlice = {
@@ -21,8 +26,8 @@ const INITIAL_STATE: IAppStateSlice = {
 };
 
 interface IProps {
-  map?: Microsoft.Maps.Map;
-  userLocLayer?: Microsoft.Maps.Layer;
+  map?: MsMap;
+  userLocLayer?: Layer;
   userLocations?: Pin[];
 }
 
@@ -57,10 +62,10 @@ export function initializeAsync(dispatch: Redux.Dispatch<IAppState>) {
 
   const MAP_CENTER = new Microsoft.Maps.Location(47.611427, -122.337454);
 
-  let map: Microsoft.Maps.Map;
-  let userLocLayer: Microsoft.Maps.Layer;
-  let autosuggestMgr: Microsoft.Maps.AutosuggestManager;
-  let busStopsLayer: Microsoft.Maps.ClusterLayer;
+  let map: MsMap;
+  let userLocLayer: Layer;
+  let autosuggestMgr: AutosuggestMgr;
+  let busStopsLayer: ClusterLayer;
 
   Promise.resolve()
     .then(() => {
@@ -110,8 +115,8 @@ export function initializeAsync(dispatch: Redux.Dispatch<IAppState>) {
     )
     .then((vals) => {
       console.log('Map and modules are loaded!');
-      autosuggestMgr = vals[0];
-      busStopsLayer = vals[1];
+      autosuggestMgr = (vals[0] as AutosuggestMgr);
+      busStopsLayer = (vals[1] as ClusterLayer);
     })
     .then(() => {
       console.log('Requesting bus stops from the API');
@@ -151,16 +156,15 @@ export function reducer(state: IAppStateSlice = INITIAL_STATE, action: any) {
   }
 }
 
-function mapStateToProps(state: IAppState) {
+function mapStateToProps(state: IAppState): IProps {
   return {
     map: state.map.map,
     userLocLayer: state.map.userLocLayer,
     userLocations: state.searchList.userLocations,
-    busStopsLayer: state.map.busStopsLayer,
   };
 }
 
-function mapDispatchToProps(dispatch: Redux.Dispatch<{}>) {
+function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): IProps {
   return {};
 }
 

@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
 import * as Redux from 'redux';
-import thunk from 'redux-thunk';
+import ReduxThunk from 'redux-thunk'; // tslint:disable-line:import-name
 
 import * as Map from './Map';
 import * as SearchList from './SearchList';
@@ -37,7 +37,7 @@ const store = Redux.createStore<IAppState>(
     map: Map.reducer,
     searchList: SearchList.reducer,
   }),
-  Redux.applyMiddleware(thunk)
+  Redux.applyMiddleware(ReduxThunk)
 );
 
 window.hotrReduxStore = store;

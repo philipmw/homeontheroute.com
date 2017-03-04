@@ -74,7 +74,7 @@ class SearchListComponent extends React.Component<IProps, {}> {
   }
 }
 
-function mapStateToProps(state: IAppState, ownProps: IProps) {
+function mapStateToProps(state: IAppState): IProps {
   return {
     autosuggestMgr: state.map.autosuggestMgr,
     inputsQty: state.searchList.inputsQty,
@@ -82,7 +82,7 @@ function mapStateToProps(state: IAppState, ownProps: IProps) {
   };
 }
 
-function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IProps) {
+function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): IProps {
   return {
     onAddInput: () => {
       dispatch({
