@@ -43,7 +43,7 @@ class MapComponent extends React.Component<IProps, {}> {
     // Sync pins on the map with user locations.
     if (this.props.userLocLayer) {
       this.props.userLocLayer.clear();
-      for (const pin of this.props.userLocations) {
+      for (let pin of this.props.userLocations) { // tslint:disable-line:prefer-const
         this.props.userLocLayer.add(
           new Microsoft.Maps.Pushpin(
             pin.location,
@@ -60,6 +60,48 @@ class MapComponent extends React.Component<IProps, {}> {
 export function initializeAsync(dispatch: Redux.Dispatch<IAppState>) {
   console.log('Beginning to initialize Map asynchronously from React');
 
+  // We want to load Bing Maps, but the Bing Maps V8 Control always
+  // loads asynchronously (because of sub-files, I guess), even
+  // when we force the top-level JS file to load synchronously.
+  //
+  // So, we have to sleep, checking for window.Microsoft to start existing.
+  //
+  // Why not just use the callback functionality that Bing Maps supports?
+  // I'd love to, for cleaner code, but I don't see a good way of sharing
+  // `dispatch` with that callback.  We have it here, but if we have to
+  // specify the callback by name in the dynamic <script> tag, we can't
+  // keep our closure.  (I could hang `dispatch` on window, but come on,
+  // that's gross design.)
+  Promise.resolve()
+    .then(() => {
+      console.log('Loading Bing Maps JS...');
+      const bingScriptE = document.createElement('script');
+      bingScriptE.setAttribute('src', '//www.bing.com/api/maps/mapcontrol');
+      bingScriptE.setAttribute('type', 'text/javascript');
+      bingScriptE.setAttribute('async', 'false');
+      document.head.appendChild(bingScriptE);
+      console.log('Created Bing Maps JS element');
+      return waitForMapScriptLoad(dispatch);
+    });
+}
+
+function waitForMapScriptLoad(dispatch: Redux.Dispatch<IAppState>) {
+  if (typeof Microsoft == 'undefined') { // tslint:disable-line
+    console.log('Awaiting `Microsoft`...');
+    return setTimeout(() => waitForMapScriptLoad(dispatch), 50);
+  } else if (typeof Microsoft.Maps == 'undefined') { // tslint:disable-line
+    console.log('Awaiting `Microsoft.Maps`...');
+    return setTimeout(() => waitForMapScriptLoad(dispatch), 10);
+  } else if (typeof Microsoft.Maps.Location == 'undefined') { // tslint:disable-line
+    console.log('Awaiting `Microsoft.Maps.Location`...');
+    return setTimeout(() => waitForMapScriptLoad(dispatch), 10);
+  } else {
+    console.log('Bing Maps JS is loaded!  Proceeding with map initialization.');
+    return initializeAfterScriptLoaded(dispatch);
+  }
+}
+
+function initializeAfterScriptLoaded(dispatch: Redux.Dispatch<IAppState>) {
   const MAP_CENTER = new Microsoft.Maps.Location(47.611427, -122.337454);
 
   let map: MsMap;
@@ -67,15 +109,7 @@ export function initializeAsync(dispatch: Redux.Dispatch<IAppState>) {
   let autosuggestMgr: AutosuggestMgr;
   let busStopsLayer: ClusterLayer;
 
-  Promise.resolve()
-    .then(() => {
-      console.log('Loading Bing Maps JS...');
-      const bingScriptE = document.createElement('script');
-      bingScriptE.setAttribute('src', '//www.bing.com/api/maps/mapcontrol');
-      bingScriptE.setAttribute('type', 'text/javascript');
-      document.body.appendChild(bingScriptE);
-      console.log('Loading Bing Maps element created');
-    })
+  return Promise.resolve()
     .then(() => {
       console.log('constructing Map...');
       map = new Microsoft.Maps.Map('#main-map', {
@@ -119,6 +153,23 @@ export function initializeAsync(dispatch: Redux.Dispatch<IAppState>) {
       busStopsLayer = (vals[1] as ClusterLayer);
     })
     .then(() => {
+      dispatch({
+        type: 'MAP_INITIALIZED',
+        map,
+        autosuggestMgr,
+        userLocLayer,
+        busStopsLayer
+      });
+    })
+    .catch((e) => {
+      console.log('Map could not initialize: ' + e);
+      dispatch({
+        type: 'MAP_INITIALIZE_ERROR',
+        error: e
+      });
+      throw e;
+    })
+    .then(() => {
       console.log('Requesting bus stops from the API');
       return API.stops();
     })
@@ -129,15 +180,13 @@ export function initializeAsync(dispatch: Redux.Dispatch<IAppState>) {
         const loc = new Microsoft.Maps.Location(stop.lat, stop.lon);
         return new Microsoft.Maps.Pushpin(loc);
       }));
-    })
-    .then(() => {
+
       dispatch({
-        type: 'MAP_INITIALIZED',
-        map,
-        autosuggestMgr,
-        userLocLayer,
-        busStopsLayer
+        type: 'STOPS_LOADED'
       });
+    })
+    .catch((e) => {
+      console.error('Could not load stops: ' + e);
     });
 }
 

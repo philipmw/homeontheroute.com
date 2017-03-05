@@ -32,16 +32,12 @@ I found these useful throughout development:
 
 The loading sequence:
 
-1. `index.html` loads the DOM, app JS, and begins loading Bing Maps V8 Control.
-1. React loads the global Redux state and app components.  The app loads without a map for now.
-1. Bing Maps V8 Control loads asynchronously and invokes the callback `BingMapControlLoaded()`.
-1. `BingMapControlLoaded` updates the Redux state with the fact that Bing Maps JS is now available.
-1. The app renders the map.
-
-Note that there's a race condition:
-if Bing Maps V8 Control loads before React sets up the global Redux state, the callback won't be able to signal that maps JS is ready.
-The app will crash.
-But I consider this rare enough that I don't want to spend time fixing it right now.
+1. `index.html` loads the DOM and app JS.  The app JS begins executing.
+1. React loads the global Redux state and renders app components.
+1. React asynchronously starts loading Bing Maps V8 Control.
+1. Bing Maps V8 Control loads asynchronously.  Meanwhile, the loader is waiting for Maps to fully load.
+1. Once Maps is loaded, we render the map view, then load bus stops.
+1. The end; now we react only to user input.
 
 ## Adding dependencies
 

@@ -27,6 +27,10 @@ class AppComponent extends React.Component<IAppState, {}> {
         <SearchList.SearchList/>
       </div>
 
+      <div id='loading-text'>
+        <p>Map is loading...</p>
+      </div>
+
       <Map.Map/>
     </div>;
   }
@@ -52,6 +56,7 @@ ReactDOM.render(
 store.dispatch({
   type: 'HOTR_APP_STARTED'
 });
+
 store.dispatch((dispatch) => {
   Map.initializeAsync(dispatch);
 });
