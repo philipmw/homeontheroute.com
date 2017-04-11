@@ -178,7 +178,9 @@ function initializeAfterScriptLoaded(dispatch: Redux.Dispatch<IAppState>) {
       busStopsLayer.clear();
       busStopsLayer.setPushpins(stops.map((stop) => {
         const loc = new Microsoft.Maps.Location(stop.lat, stop.lon);
-        return new Microsoft.Maps.Pushpin(loc);
+        return new Microsoft.Maps.Pushpin(loc, {
+          icon: 'bus_stop_placard.png'
+        });
       }));
 
       dispatch({
