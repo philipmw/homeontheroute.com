@@ -4,17 +4,10 @@ machine:
 dependencies:
   override:
     - npm install
-    - ./node_modules/.bin/typings install github:Microsoft/Bing-Maps-V8-TypeScript-Definitions/scripts/MicrosoftMaps/Microsoft.Maps.d.ts --global --save
-    - ./node_modules/.bin/typings install github:Microsoft/Bing-Maps-V8-TypeScript-Definitions/scripts/MicrosoftMaps/Modules/Autosuggest.d.ts --global --save
-    - ./node_modules/.bin/typings install github:Microsoft/Bing-Maps-V8-TypeScript-Definitions/scripts/MicrosoftMaps/Modules/Clustering.d.ts --global --save
-    - ./node_modules/.bin/typings install github:Microsoft/Bing-Maps-V8-TypeScript-Definitions/scripts/MicrosoftMaps/Modules/Search.d.ts --global --save
-    - ./node_modules/.bin/typings install dt~redux --global
-    - ./node_modules/.bin/typings install react --save
-    - ./node_modules/.bin/typings install react-dom --save
-    - ./node_modules/.bin/typings install react-redux --save
+    - npm run install-typings
 compile:
   override:
-    - ./node_modules/.bin/webpack --display-error-details
+    - npm run build
 test:
   override:
     - '[ -f ./built/app.bundle.js ]'
@@ -23,6 +16,8 @@ deployment:
     branch: master
     commands:
       - echo 'Deploying to production'
+      - aws s3 cp index.html s3://homeontheroute.com
+      - aws s3 sync --delete built s3://homeontheroute.com/built
   beta:
     branch: beta
     commands:
