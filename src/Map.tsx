@@ -187,6 +187,7 @@ function initializeAfterScriptLoaded(dispatch: Redux.Dispatch<IAppState>) {
     })
     .catch((e) => {
       console.error('Could not load stops: ' + e);
+      throw e;
     });
 }
 
