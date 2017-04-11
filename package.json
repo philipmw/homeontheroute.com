@@ -20,7 +20,7 @@
     "@types/react-redux": "latest",
     "typescript": "latest",
     "ts-loader": "latest",
-    "tslint": "latest",
+    "tslint": "<5",
     "tslint-microsoft-contrib": "latest",
     "webpack": "beta"
   },
