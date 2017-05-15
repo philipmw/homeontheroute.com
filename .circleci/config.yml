@@ -3,7 +3,8 @@ jobs:
   build:
     docker:
       - image: node:alpine
-      - image: garland/aws-cli-docker:latest
+      - image: fstab/aws-cli:latest
+#      - image: garland/aws-cli-docker:latest
     working_directory: ~/homeontheroute.com
     steps:
       - checkout
