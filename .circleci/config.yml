@@ -3,17 +3,18 @@ jobs:
   build:
     docker:
       - image: node:latest
+    working_directory: ~/homeontheroute.com
     steps:
       - checkout
       - run:
-        command: npm install
+          command: npm install
       - run:
-        command: npm run install-typings
+          command: npm run install-typings
       - run:
-        command: npm run build
+          command: npm run build
       - run: '[ -f ./built/app.bundle.js ]'
-        name: Test compilation
-        command:
+          name: Test compilation
+          command:
       - add_ssh_keys
       - deploy:
-        command: ./bin/deploy-${CIRCLE_BRANCH}.sh
+          command: ./bin/deploy-${CIRCLE_BRANCH}.sh
