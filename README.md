@@ -9,7 +9,7 @@ Home On The Route, a web app helping you find the perfect neighborhood for your 
 
 ## Development Requirements
 
-For instructions on what it takes to set up Home On The Route on a fresh computer, refer to `circle.yml`.
+For instructions on what it takes to set up Home On The Route on a fresh computer, refer to `.circleci/config.yml`.
 This is guaranteed to be accurate, since this project is continuously built from it.
 
 ## Run locally

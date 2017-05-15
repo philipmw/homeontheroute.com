@@ -1,0 +1,19 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: node:latest
+    steps:
+      - checkout
+      - run:
+        command: npm install
+      - run:
+        command: npm run install-typings
+      - run:
+        command: npm run build
+      - run: '[ -f ./built/app.bundle.js ]'
+        name: Test compilation
+        command:
+      - add_ssh_keys
+      - deploy:
+        command: ./bin/deploy-${CIRCLE_BRANCH}.sh
