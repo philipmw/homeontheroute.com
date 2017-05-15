@@ -10,10 +10,10 @@ interface IProps {
   autosuggestMgr?: Microsoft.Maps.AutosuggestManager;
   inputsQty?: number;
   pins?: Pin[];
-  onAddInput?: () => any;
-  onAddPin?: (pin: Pin) => any;
-  onUpdatePin?: (id: number, pin: Pin) => any;
-  onDeleteInput?: (id: number) => any;
+  onAddInput?(): any;
+  onAddPin?(pin: Pin): any;
+  onUpdatePin?(id: number, pin: Pin): any;
+  onDeleteInput?(id: number): any;
 }
 
 export interface IAppStateSlice {
@@ -33,7 +33,18 @@ class SearchListComponent extends React.Component<IProps, {}> {
     pins: [],
   };
 
-  private addressInput(i: number) {
+  public render(): JSX.Element {
+    console.log('Rendering SearchList');
+    const props: IProps = this.props;
+
+    return <div>
+      <h2>What are your favorite places?</h2>
+      {this.addressInputElements()}
+      <input type='button' value='+' onClick={props.onAddInput}/>
+    </div>;
+  }
+
+  private addressInput(i: number): JSX.Element {
     if (i < this.props.pins.length) {
       return <AddressInput id={i}
                            onNewPin={null}
@@ -52,25 +63,16 @@ class SearchListComponent extends React.Component<IProps, {}> {
     }
   }
 
-  private addressInputElements() {
+  private addressInputElements(): JSX.Element[] {
     // I would love to write this declaratively, akin to:
     //  (new Array(inputsQty)).map((i) => ...)
     // but have not been able to make that work in JS.
-    const list = [];
-    for (let i = 0; i < this.props.inputsQty; i += 1) {
+    const list: JSX.Element[] = [];
+    for (let i: number = 0; i < this.props.inputsQty; i += 1) {
       list.push(this.addressInput(i));
     }
-    return list;
-  }
 
-  public render() { // tslint:disable-line:no-unused-variable
-    console.log('Rendering SearchList');
-    const props = this.props;
-    return <div>
-      <h2>What are your favorite places?</h2>
-      {this.addressInputElements()}
-      <input type='button' value='+' onClick={props.onAddInput}/>
-    </div>;
+    return list;
   }
 }
 
@@ -84,25 +86,25 @@ function mapStateToProps(state: IAppState): IProps {
 
 function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): IProps {
   return {
-    onAddInput: () => {
+    onAddInput: (): void => {
       dispatch({
         type: 'ADD_ADDRESS_INPUT',
       });
     },
-    onAddPin: (pin: Pin) => {
+    onAddPin: (pin: Pin): void => {
       dispatch({
         type: 'ADD_PIN',
         pin,
       });
     },
-    onUpdatePin: (id: number, pin: Pin) => {
+    onUpdatePin: (id: number, pin: Pin): void => {
       dispatch({
         type: 'UPDATE_PIN',
         id,
         pin,
       });
     },
-    onDeleteInput: (id: number) => {
+    onDeleteInput: (id: number): void => {
       dispatch({
         type: 'DELETE_INPUT',
         id,
@@ -111,7 +113,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): IProps {
   };
 }
 
-export function reducer(state: IAppStateSlice = INITIAL_STATE, action: any) {
+export function reducer(state: IAppStateSlice = INITIAL_STATE, action: any): IAppStateSlice {
   console.log(`SearchList reducer receives ${action.type}`);
   switch (action.type) {
     case 'ADD_ADDRESS_INPUT':
@@ -123,8 +125,9 @@ export function reducer(state: IAppStateSlice = INITIAL_STATE, action: any) {
         userLocations: [...state.userLocations, action.pin]
       });
     case 'UPDATE_PIN':
-      const newPins = state.userLocations.slice();
+      const newPins: Pin[] = state.userLocations.slice();
       newPins[action.id] = action.pin;
+
       return Object.assign({}, state, {
         userLocations: [...state.userLocations, action.pin]
       });
@@ -147,4 +150,4 @@ export function reducer(state: IAppStateSlice = INITIAL_STATE, action: any) {
 }
 
 // tslint:disable-next-line:variable-name
-export const SearchList = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(SearchListComponent);
+export const SearchList: React.ComponentClass<IProps> = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(SearchListComponent);

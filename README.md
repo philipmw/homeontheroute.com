@@ -66,3 +66,9 @@ This will auto-update `typings.json`.
 2. Update `webpack.config.js` to know the new JS is provided externally.
 
 Both of these steps are because I refuse to pay for hosting these dependencies myself; let the public CDN bear the cost.
+
+## package.json
+
+Since `package.json` does not support comments, this section is to document some things about it.
+
+1. The `tsutils` dependency is a peer dependency of `tslint-microsoft-contrib@5.0.0`.

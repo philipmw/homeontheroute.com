@@ -1,6 +1,6 @@
 const BASE_URL = 'http://api.homeontheroute.com';
 
-interface Stop {
+export interface Stop {
   id: string;
   lat: number;
   lon: number;

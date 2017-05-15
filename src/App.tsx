@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
 import * as Redux from 'redux';
-import ReduxThunk from 'redux-thunk'; // tslint:disable-line:import-name
+import thunk from 'redux-thunk'; // tslint:disable-line:import-name
 
 import * as Map from './Map';
 import * as SearchList from './SearchList';
@@ -14,12 +14,14 @@ export interface IAppState {
 
 interface Window { // tslint:disable-line:interface-name
   hotrReduxStore: Redux.Store<IAppState>;
+  hotrMapsLoaded: Function;
 }
 declare var window: Window;
 
 class AppComponent extends React.Component<IAppState, {}> {
-  public render() {
+  public render(): JSX.Element {
     console.log('Rendering AppComponent');
+
     return <div>
       <div id='data-collection'>
         <h1>Home On The Route</h1>
@@ -36,15 +38,21 @@ class AppComponent extends React.Component<IAppState, {}> {
   }
 }
 
-const store = Redux.createStore<IAppState>(
+const store: Redux.Store<IAppState> = Redux.createStore<IAppState>(
   Redux.combineReducers<IAppState>({
     map: Map.reducer,
     searchList: SearchList.reducer,
   }),
-  Redux.applyMiddleware(ReduxThunk)
+  Redux.applyMiddleware(thunk)
 );
 
 window.hotrReduxStore = store;
+
+// This global function exists only for debugging Bing Maps.  Its existence is
+// not important to this app.
+window.hotrMapsLoaded = (): void => {
+  console.log('hotrMapsLoaded callback invoked by Bing Maps V8 Control');
+};
 
 ReactDOM.render(
   <Provider store={store}>
@@ -57,6 +65,6 @@ store.dispatch({
   type: 'HOTR_APP_STARTED'
 });
 
-store.dispatch((dispatch) => {
+store.dispatch((dispatch: Redux.Dispatch<IAppState>): void => {
   Map.initializeAsync(dispatch);
 });

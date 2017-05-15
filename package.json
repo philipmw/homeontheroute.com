@@ -20,13 +20,14 @@
     "@types/react-redux": "latest",
     "typescript": "latest",
     "ts-loader": "latest",
-    "tslint": "<5",
+    "tslint": "latest",
     "tslint-microsoft-contrib": "latest",
+    "tsutils": "1.6.0",
     "webpack": "beta"
   },
   "scripts": {
     "install-typings": "./bin/install-typings.sh",
-    "lint": "tslint --typecheck -t verbose src/**/*.ts[x]",
+    "lint": "tslint --project tsconfig.json --type-check -t verbose src/**/*.ts[x]",
     "build": "webpack --display-error-details && npm run lint",
     "start": "python -m SimpleHTTPServer 8000"
   }
