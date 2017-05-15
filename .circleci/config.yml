@@ -3,10 +3,14 @@ jobs:
   build:
     docker:
       - image: node:alpine
-      - image: fstab/aws-cli:latest
-#      - image: garland/aws-cli-docker:latest
     working_directory: ~/homeontheroute.com
     steps:
+      - run:
+          name: install AWS CLI
+          command: |
+            apk --no-cache update && \
+            apk --no-cache add python py-pip py-setuptools ca-certificates curl groff less && \
+            pip --no-cache-dir install awscli
       - checkout
       - run:
           command: npm install
