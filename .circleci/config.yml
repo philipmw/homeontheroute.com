@@ -3,6 +3,7 @@ jobs:
   build:
     docker:
       - image: node:latest
+      - image: garland/aws-cli-docker:latest
     working_directory: ~/homeontheroute.com
     steps:
       - checkout
