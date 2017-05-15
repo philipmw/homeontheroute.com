@@ -12,9 +12,9 @@ jobs:
           command: npm run install-typings
       - run:
           command: npm run build
-      - run: '[ -f ./built/app.bundle.js ]'
+      - run:
           name: Test compilation
-          command:
+          command: '[ -f ./built/app.bundle.js ]'
       - add_ssh_keys
       - deploy:
           command: ./bin/deploy-${CIRCLE_BRANCH}.sh
