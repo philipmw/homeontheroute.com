@@ -33,10 +33,11 @@ I found these useful throughout development:
 The loading sequence:
 
 1. `index.html` loads the DOM and app JS.  The app JS begins executing.
-1. React loads the global Redux state and renders app components.
+1. React loads the global Redux state, renders app components, and emits _HOTR_APP_STARTED_.
 1. React asynchronously starts loading Bing Maps V8 Control.
-1. Bing Maps V8 Control loads asynchronously.  Meanwhile, the loader is waiting for Maps to fully load.
-1. Once Maps is loaded, we render the map view, then load bus stops.
+1. Bing Maps V8 Control loads asynchronously, then invokes a callback.
+1. The callback invokes an async Redux action that emits _MAPS_SDK_LOADED_,
+   then loads all needed Maps SDK modules, then emits _MAPS_ALL_MODULES_LOADED_.
 1. The end; now we react only to user input.
 
 ## Adding dependencies

@@ -51,7 +51,7 @@ window.hotrReduxStore = store;
 // This global function exists only for debugging Bing Maps.  Its existence is
 // not important to this app.
 window.hotrMapsLoaded = (): void => {
-  console.log('hotrMapsLoaded callback invoked by Bing Maps V8 Control');
+  window.hotrReduxStore.dispatch(Map.loadMapComponentsAsyncAction);
 };
 
 ReactDOM.render(
