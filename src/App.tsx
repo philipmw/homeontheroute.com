@@ -18,7 +18,7 @@ interface Window { // tslint:disable-line:interface-name
 }
 declare var window: Window;
 
-class AppComponent extends React.Component<IAppState, {}> {
+class AppComponent extends React.Component<{}, IAppState> {
   public render(): JSX.Element {
     console.log('Rendering AppComponent');
 
