@@ -21,7 +21,7 @@ export interface IAppStateSlice {
   userLocations: Pin[];
 }
 
-const INITIAL_STATE: IAppStateSlice = {
+export const INITIAL_STATE: IAppStateSlice = {
   inputsQty: 1,
   userLocations: [],
 };
@@ -79,12 +79,12 @@ class SearchListComponent extends React.Component<IProps, {}> {
 function mapStateToProps(state: IAppState): IProps {
   return {
     autosuggestMgr: state.map.autosuggestMgr,
-    inputsQty: state.searchList.inputsQty,
-    pins: state.searchList.userLocations,
+    inputsQty: state.dashboard.searchList.inputsQty,
+    pins: state.dashboard.searchList.userLocations,
   };
 }
 
-function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): IProps {
+function mapDispatchToProps(dispatch: Redux.Dispatch<IAppState>): IProps {
   return {
     onAddInput: (): void => {
       dispatch({

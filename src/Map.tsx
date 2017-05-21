@@ -33,19 +33,16 @@ const INITIAL_STATE: IAppStateSlice = {
 
 interface IProps {
   map?: MsMap;
+  mapIsReady?: boolean;
   userLocLayer?: Layer;
   userLocations?: Pin[];
 }
 
-class MapComponent extends React.Component<IProps, {}> {
-  public static defaultProps: IProps = {
-    map: null,
-    userLocLayer: null,
-    userLocations: [],
-  };
-
+class MapComponent extends React.Component<IProps, IAppStateSlice> {
   public render(): JSX.Element {
+    console.log('Rendering MapComponent');
     console.log(`Map sees ${this.props.userLocations.length} user locations`);
+
     // Sync pins on the map with user locations.
     if (this.props.userLocLayer) {
       this.props.userLocLayer.clear();
@@ -60,7 +57,18 @@ class MapComponent extends React.Component<IProps, {}> {
       }
     }
 
-    return <div id='main-map'></div>;
+    if (this.props.mapIsReady) {
+      return <div>
+        <div id='main-map'></div>
+      </div>;
+    } else {
+      return <div>
+        <div id='main-map'></div>
+        <div id='loading-text'>
+          <p>Map is loading...</p>
+        </div>
+      </div>;
+    }
   }
 }
 
@@ -213,6 +221,10 @@ export function reducer(state: IAppStateSlice = INITIAL_STATE, action: any): IAp
       return Object.assign({}, state, {
         databinningIsLoaded: true
       });
+    case 'MAPS_ALL_MODULES_LOADED':
+      return Object.assign({}, state, {
+        allModulesAreLoaded: true
+      });
     default:
       return state;
   }
@@ -221,14 +233,13 @@ export function reducer(state: IAppStateSlice = INITIAL_STATE, action: any): IAp
 function mapStateToProps(state: IAppState): IProps {
   return {
     map: state.map.map,
+    mapIsReady: state.map.autosuggestIsLoaded &&
+                state.map.clusteringIsLoaded &&
+                state.map.databinningIsLoaded,
     userLocLayer: state.map.userLocLayer,
-    userLocations: state.searchList.userLocations,
+    userLocations: state.dashboard.searchList.userLocations,
   };
 }
 
-function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): IProps {
-  return {};
-}
-
 // tslint:disable-next-line:variable-name
-export const Map: React.ComponentClass<IProps> = connect(mapStateToProps, mapDispatchToProps)(MapComponent);
+export const Map: React.ComponentClass<IProps> = connect(mapStateToProps)(MapComponent);

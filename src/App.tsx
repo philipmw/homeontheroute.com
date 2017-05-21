@@ -4,12 +4,12 @@ import {Provider} from 'react-redux';
 import * as Redux from 'redux';
 import thunk from 'redux-thunk'; // tslint:disable-line:import-name
 
+import * as Dashboard from './Dashboard';
 import * as Map from './Map';
-import * as SearchList from './SearchList';
 
 export interface IAppState {
   map?: Map.IAppStateSlice;
-  searchList?: SearchList.IAppStateSlice;
+  dashboard?: Dashboard.IAppStateSlice;
 }
 
 interface Window { // tslint:disable-line:interface-name
@@ -23,15 +23,7 @@ class AppComponent extends React.Component<{}, IAppState> {
     console.log('Rendering AppComponent');
 
     return <div>
-      <div id='data-collection'>
-        <h1>Home On The Route</h1>
-
-        <SearchList.SearchList/>
-      </div>
-
-      <div id='loading-text'>
-        <p>Map is loading...</p>
-      </div>
+      <Dashboard.Dashboard/>
 
       <Map.Map/>
     </div>;
@@ -41,7 +33,7 @@ class AppComponent extends React.Component<{}, IAppState> {
 const store: Redux.Store<IAppState> = Redux.createStore<IAppState>(
   Redux.combineReducers<IAppState>({
     map: Map.reducer,
-    searchList: SearchList.reducer,
+    dashboard: Dashboard.reducer,
   }),
   Redux.applyMiddleware(thunk)
 );
