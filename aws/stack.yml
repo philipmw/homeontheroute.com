@@ -79,7 +79,7 @@ Resources:
       HostedZoneName: homeontheroute.com.
       Name: beta.homeontheroute.com.
       Type: A
-  DeploymentUser:
+  DeployUser:
     Type: AWS::IAM::User
     Properties:
       Policies:
@@ -94,17 +94,3 @@ Resources:
                   - Fn::Sub: "arn:aws:s3:::${HotrProdBucket}/*"
                   - Fn::Sub: "arn:aws:s3:::${HotrBetaBucket}"
                   - Fn::Sub: "arn:aws:s3:::${HotrBetaBucket}/*"
-  DeploymentUserKey:
-    Type: AWS::IAM::AccessKey
-    Properties:
-      UserName:
-        Ref: DeploymentUser
-Outputs:
-  DeploymentUserAccessId:
-    Value:
-      Ref: DeploymentUserKey
-  DeploymentUserPrivateKey:
-    Value:
-      Fn::GetAtt:
-        - DeploymentUserKey
-        - SecretAccessKey
