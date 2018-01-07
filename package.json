@@ -23,7 +23,7 @@
     "tslint": "latest",
     "tslint-microsoft-contrib": "latest",
     "tsutils": "1.6.0",
-    "webpack": "beta"
+    "webpack": "3.10.0"
   },
   "scripts": {
     "install-typings": "./bin/install-typings.sh",
